@@ -1,41 +1,44 @@
 import Foundation
 
-class Document {
+final class Report: Visitable {
     
     var title: String
-    var created: Date
-    var author: String
+    var illustrations: [Data]
+    var paragraphs: [String]
+    var template: [Int: Int]
     
-    init(title: String, author: String) {
+    init(title: String, illustrations: [Data] = [],
+         paragraphs: [String] = [], template: [Int: Int] = [:]) {
+        
         self.title = title
-        self.created = Date()
-        self.author = author
+        self.illustrations = illustrations
+        self.paragraphs = paragraphs
+        self.template = template
+    }
+    
+    func accept(visitor: Visitor) {
+        visitor.visit(report: self)
     }
 }
 
-final class Report: Document, Visitable {
+final class SpreadSheet: Visitable {
     
-    var illustrations: [Data] = []
-    var paragraphs: [String] = []
-    var template: [String: String] = [:]
+    var title: String
+    var structure: [[String]]
     
-    func accept(visitor: Visitor) {
-        visitor.visit(doc: self)
+    init(title: String, structure: [[String]] = [[]]) {
+        self.title = title
+        self.structure = structure
     }
-}
-
-final class SpreadSheet: Document, Visitable {
-    
-    var structure: [[String]] = [[]]
     
     func accept(visitor: Visitor) {
-        visitor.visit(doc: self)
+        visitor.visit(spreadsheet: self)
     }
 }
 
 protocol Visitor {
-    func visit(doc: Report)
-    func visit(doc: SpreadSheet)
+    func visit(report: Report)
+    func visit(spreadsheet: SpreadSheet)
 }
 
 protocol Visitable {
@@ -44,41 +47,41 @@ protocol Visitable {
 
 final class HTMLExporter: Visitor {
     
-    func visit(doc: Report) {
-        print("Export \(doc.title) report to HTML")
+    func visit(report: Report) {
+        print("Export report \"\(report.title)\" to HTML")
     }
     
-    func visit(doc: SpreadSheet) {
-        print("Export \(doc.title) spreadsheet to HTML")
+    func visit(spreadsheet: SpreadSheet) {
+        print("Export spreadsheet \"\(spreadsheet.title)\" to HTML")
     }
 }
 
 final class PDFExporter: Visitor {
     
-    func visit(doc: Report) {
-        print("Export report to PDF")
+    func visit(report: Report) {
+        print("Export report \"\(report.title)\" to PDF")
     }
     
-    func visit(doc: SpreadSheet) {
-        print("Export spreadsheet to PDF")
+    func visit(spreadsheet: SpreadSheet) {
+        print("Export spreadsheet \"\(spreadsheet.title)\" to PDF")
     }
 }
 
-let doc1 = Report(title: "Report 1", author: "John Smith")
-let doc2 = Report(title: "Report 2", author: "John Smith")
-let doc3 = Report(title: "Report 3", author: "John Smith")
+let report1 = Report(title: "Report 1")
+let report2 = Report(title: "Report 2")
+let report3 = Report(title: "Report 3")
 
-let doc4 = SpreadSheet(title: "SpreadSheet 1", author: "John Appleseed")
-let doc5 = SpreadSheet(title: "SpreadSheet 2", author: "John Appleseed")
+let spreadsheet1 = SpreadSheet(title: "SpreadSheet 1")
+let spreadsheet2 = SpreadSheet(title: "SpreadSheet 2")
 
 let htmlExporter = HTMLExporter()
 let pdfExporter = PDFExporter()
 
-for doc in [doc1, doc2, doc3] {
-    doc.accept(visitor: htmlExporter)
+for report in [report1, report2, report3] {
+    report.accept(visitor: htmlExporter)
 }
 
-for doc in [doc4, doc5] {
-    doc.accept(visitor: htmlExporter)
-    doc.accept(visitor: pdfExporter)
+for spreadsheet in [spreadsheet1, spreadsheet2] {
+    spreadsheet.accept(visitor: htmlExporter)
+    spreadsheet.accept(visitor: pdfExporter)
 }
