@@ -77,11 +77,10 @@ let spreadsheet2 = SpreadSheet(title: "SpreadSheet 2")
 let htmlExporter = HTMLExporter()
 let pdfExporter = PDFExporter()
 
-for report in [report1, report2, report3] {
-    report.accept(visitor: htmlExporter)
-}
+let docs: [Visitable] = [report1, report2, report3, spreadsheet1, spreadsheet2]
 
-for spreadsheet in [spreadsheet1, spreadsheet2] {
-    spreadsheet.accept(visitor: htmlExporter)
-    spreadsheet.accept(visitor: pdfExporter)
-}
+docs.forEach { $0.accept(visitor: htmlExporter) }
+
+print("-----")
+
+docs.forEach { $0.accept(visitor: pdfExporter) }
